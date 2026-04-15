@@ -161,7 +161,19 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
   <div class="g2">
     <div class="fg"><label class="lbl">면적 <span class="opt">(선택)</span></label><input type="text" id="area" placeholder="예) 150㎡ / 45평"></div>
     <div class="fg"><label class="lbl">예산 범위 <span class="opt">(선택)</span></label>
-      <select id="budget"><option value="">선택</option><option>500만원 미만</option><option>500만~1,000만원</option><option>1,000만~3,000만원</option><option>3,000만~5,000만원</option><option>5,000만원 이상</option><option>협의</option></select>
+      <select id="budget" onchange="toggleBudgetEtc(this.value)"><option value="">선택</option><option>0~1,000만원</option><option>1,000~3,000만원</option><option>3,000~5,000만원</option><option>5,000~1억원</option><option>1억~3억원</option><option>3~5억원</option><option value="기타">기타</option></select>
+    </div>
+  </div>
+  <div class="fg hidden" id="budgetEtcArea">
+    <label class="lbl">예산 직접 입력</label>
+    <input type="text" id="budgetEtc" placeholder="예) 8,000만원">
+  </div>
+  <div class="fg">
+    <label class="lbl">공사 유형 <span class="opt">(선택)</span></label>
+    <div class="grid3">
+      <div class="sc" data-g="ct" onclick="selectCard(this,'ct')"><input type="radio" name="ct" value="원상복구공사" style="display:none"><div class="sc-icon">🔄</div><div class="sc-lbl">원상복구공사</div></div>
+      <div class="sc" data-g="ct" onclick="selectCard(this,'ct')"><input type="radio" name="ct" value="리모델링공사" style="display:none"><div class="sc-icon">🔨</div><div class="sc-lbl">리모델링공사</div></div>
+      <div class="sc" data-g="ct" onclick="selectCard(this,'ct')"><input type="radio" name="ct" value="전체공사" style="display:none"><div class="sc-icon">🏗</div><div class="sc-lbl">전체공사</div></div>
     </div>
   </div>
   <div class="fg">
@@ -437,6 +449,10 @@ window.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 <script>
+function toggleBudgetEtc(v){
+  var area=document.getElementById('budgetEtcArea');
+  if(area){area.classList.toggle('hidden', v!=='기타');}
+}
 function subD(){
   var ok=validate('nm','nmE')&validate('ph','phE')&validate('ad','adE')&validate('ct3','ct3E');
   if(!ok){var e=document.querySelector('.em.on');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});return;}
@@ -446,7 +462,28 @@ function subD(){
   var sp=document.querySelector('input[name="sp"]:checked');
   var st=document.querySelector('input[name="st"]:checked');
   document.getElementById('subBtn').disabled=true;document.getElementById('subBtn').textContent='접수 중...';
-  sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:document.getElementById('budget').value,스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value});
+
+  // 이미지 base64 수집
+  var imgEls=document.querySelectorAll('#iPrev .ipi img');
+  var images=[];
+  var pending=imgEls.length;
+  function doSend(){
+    var ct_v=document.querySelector('input[name="ct"]:checked');
+  var budgetVal=document.getElementById('budget').value==='기타'?(document.getElementById('budgetEtc').value||'기타'):document.getElementById('budget').value;
+  sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:budgetVal,공사유형:ct_v?ct_v.value:'',스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value,images:images});
+  }
+  if(pending===0){doSend();return;}
+  var iFile=document.getElementById('iFile');
+  var files=iFile?Array.prototype.slice.call(iFile.files,0,5):[];
+  if(files.length===0){doSend();return;}
+  files.forEach(function(file){
+    var r=new FileReader();
+    r.onload=function(e){
+      images.push(e.target.result);
+      if(images.length===files.length)doSend();
+    };
+    r.readAsDataURL(file);
+  });
 }
 </script>
 </body></html>
