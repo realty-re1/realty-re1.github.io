@@ -194,6 +194,7 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
         <span style="font-size:22px">📎</span>
         <span style="font-size:12px;font-weight:600;color:#0F5C5C">이미지 첨부하기</span>
         <span style="font-size:10.5px;color:#6B7280">JPG · PNG · 최대 5장</span>
+        <span style="font-size:10.5px;color:#E53E3E;margin-top:3px;display:block">※ 이미지가 많거나 용량이 클 경우 3장 이하로 올려주세요.</span>
       </div>
     </div>
     <input type="file" id="iFile" accept="image/*" multiple style="display:none" onchange="previewImages(this)">
@@ -473,14 +474,26 @@ function subD(){
   var files=iFile?Array.prototype.slice.call(iFile.files,0,5):[];
   if(files.length===0){doSend([]);return;}
   var imgs=[];
-  files.forEach(function(file){
+  function compressAndCollect(file){
     var r=new FileReader();
     r.onload=function(e){
-      imgs.push(e.target.result);
-      if(imgs.length===files.length)doSend(imgs);
+      var img=new Image();
+      img.onload=function(){
+        var canvas=document.createElement('canvas');
+        var maxW=800,maxH=800;
+        var w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+        if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        imgs.push(canvas.toDataURL('image/jpeg',0.5));
+        if(imgs.length===files.length)doSend(imgs);
+      };
+      img.src=e.target.result;
     };
     r.readAsDataURL(file);
-  });
+  }
+  files.forEach(function(file){compressAndCollect(file);});
 }
 </script>
 </body></html>
