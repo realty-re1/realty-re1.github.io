@@ -87,8 +87,6 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
 .sp{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;background:#EAF5F5;color:#0F5C5C}
 .sp-f{background:#DCFCE7;color:#166534}
 /* 이미지 업로드 */
-.iuw{border:2px dashed #C8E0E0;border-radius:11px;padding:16px;text-align:center;cursor:pointer}
-.iuw:hover{border-color:#1A7A7A}
 .ipg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
 .ipi{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;border:1.5px solid #C8E0E0}
 .ipi img{width:100%;height:100%;object-fit:cover}
@@ -157,7 +155,7 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
     </div>
   </div>
   <hr class="hr2">
-  <div class="fg"><label class="lbl">공간 주소 <span class="req">*</span></label><input type="text" id="ad" placeholder="예) 서울시 관악구 신림동 000-00"><div class="em" id="adE">공간 주소를 입력해 주세요.</div></div>
+  <div class="fg"><label class="lbl">공간 주소 <span class="opt">(선택)</span></label><input type="text" id="ad" placeholder="예) 종로구 / 서울시 관악구 신림동 000-00"></div>
   <div class="g2">
     <div class="fg"><label class="lbl">면적 <span class="opt">(선택)</span></label><input type="text" id="area" placeholder="예) 150㎡ / 45평"></div>
     <div class="fg"><label class="lbl">예산 범위 <span class="opt">(선택)</span></label>
@@ -187,19 +185,7 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
       <div class="sc" data-g="st" onclick="selectCard(this,'st')"><input type="radio" name="st" value="기타" style="display:none"><div class="sc-icon">💡</div><div class="sc-lbl">기타</div></div>
     </div>
   </div>
-  <div class="fg">
-    <label class="lbl">참고 이미지 첨부 <span class="opt">(최대 5장)</span></label>
-    <div class="iuw" onclick="document.getElementById('iFile').click()">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none">
-        <span style="font-size:22px">📎</span>
-        <span style="font-size:12px;font-weight:600;color:#0F5C5C">이미지 첨부하기</span>
-        <span style="font-size:10.5px;color:#6B7280">JPG · PNG · 최대 5장</span>
-        <span style="font-size:10.5px;color:#E53E3E;margin-top:3px;display:block">※ 이미지가 많거나 용량이 클 경우 3장 이하로 올려주세요.</span>
-      </div>
-    </div>
-    <input type="file" id="iFile" accept="image/*" multiple style="display:none" onchange="previewImages(this)">
-    <div id="iPrev" class="ipg"></div>
-  </div>
+
   <div class="fg"><label class="lbl">요청 사항 <span class="opt">(선택)</span></label><textarea id="ct3" placeholder="원하시는 디자인 방향, 참고 레퍼런스, 중점을 두고 싶은 부분 등을 자유롭게 적어 주세요."></textarea><div class="em" id="ct3E">요청 사항을 입력해 주세요.</div></div>
 </div>
 <div class="card">
@@ -411,16 +397,6 @@ function showDone(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// 이미지 첨부
-function previewImages(input){
-  var prev=document.getElementById('iPrev');
-  Array.prototype.slice.call(input.files,0,5).forEach(function(file){
-    var r=new FileReader();
-    r.onload=function(e){
-      prev.innerHTML+='<div class="ipi"><img src="'+e.target.result+'"><button class="idb" onclick="this.parentNode.remove()">✕</button></div>';
-    };r.readAsDataURL(file);
-  });
-}
 
 // 중개의뢰 타입 전환
 function switchReqType(type){
@@ -455,7 +431,7 @@ function toggleBudgetEtc(v){
   if(area){area.classList.toggle('hidden', v!=='기타');}
 }
 function subD(){
-  var ok=validate('nm','nmE')&validate('ph','phE')&validate('ad','adE');
+  var ok=validate('nm','nmE')&validate('ph','phE');
   if(!ok){var e=document.querySelector('.em.on');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});return;}
   var d=document.getElementById('rDV3').value,t=document.getElementById('rTV3').value;
   if(d&&t)addBooking(d,t);
@@ -467,33 +443,7 @@ function subD(){
   // 이미지 base64 수집
   var ct_v=document.querySelector('input[name="ct"]:checked');
   var budgetVal=document.getElementById('budget').value==='기타'?(document.getElementById('budgetEtc').value||'기타'):document.getElementById('budget').value;
-  function doSend(imgs){
-    sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:budgetVal,공사유형:ct_v?ct_v.value:'',스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value,images:imgs});
-  }
-  var iFile=document.getElementById('iFile');
-  var files=iFile?Array.prototype.slice.call(iFile.files,0,5):[];
-  if(files.length===0){doSend([]);return;}
-  var imgs=[];
-  function compressAndCollect(file){
-    var r=new FileReader();
-    r.onload=function(e){
-      var img=new Image();
-      img.onload=function(){
-        var canvas=document.createElement('canvas');
-        var maxW=800,maxH=800;
-        var w=img.width,h=img.height;
-        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
-        if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
-        canvas.width=w;canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        imgs.push(canvas.toDataURL('image/jpeg',0.5));
-        if(imgs.length===files.length)doSend(imgs);
-      };
-      img.src=e.target.result;
-    };
-    r.readAsDataURL(file);
-  }
-  files.forEach(function(file){compressAndCollect(file);});
+  sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:budgetVal,공사유형:ct_v?ct_v.value:'',스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value});
 }
 </script>
 </body></html>
