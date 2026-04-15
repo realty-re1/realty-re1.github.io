@@ -171,7 +171,7 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
   <div class="rv-sel" id="rCF2"></div>
   <input type="hidden" id="rDV2"><input type="hidden" id="rTV2">
 </div>
-  <div class="fg" style="margin-top:12px"><label class="lbl">상담 내용 <span class="req">*</span></label><textarea id="ct2" placeholder="예) 신림동 고시원 30실 인수 검토 중, ROI 분석 및 리모델링 방향 상담 원합니다."></textarea><div class="em" id="ct2E">상담 내용을 입력해 주세요.</div></div>
+  <div class="fg" style="margin-top:12px"><label class="lbl">상담 내용 <span class="opt">(선택)</span></label><textarea id="ct2" placeholder="예) 신림동 고시원 30실 인수 검토 중, ROI 분석 및 리모델링 방향 상담 원합니다."></textarea><div class="em" id="ct2E">상담 내용을 입력해 주세요.</div></div>
 </div>
 <button class="btn" id="subBtn" onclick="subC()">상담 신청하기 →</button>
 </div>
@@ -392,13 +392,13 @@ window.addEventListener('DOMContentLoaded',function(){
 </script>
 <script>
 function subC(){
-  var ok=validate('nm','nmE')&validate('ph','phE')&validate('ct2','ct2E');
+  var ok=validate('nm','nmE')&validate('ph','phE');
   if(!ok){var e=document.querySelector('.em.on');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});return;}
   var d=document.getElementById('rDV2').value,t=document.getElementById('rTV2').value;
   if(d&&t)addBooking(d,t);
   var ct=document.querySelector('input[name="ct"]:checked');
   document.getElementById('subBtn').disabled=true;document.getElementById('subBtn').textContent='접수 중...';
-  sendData({type:'컨설팅',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,상담유형:ct?ct.value:'',예약날짜:d,예약시간:t,상담내용:document.getElementById('ct2').value});
+  sendData({type:'컨설팅',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,상담유형:ct?ct.value:'',예약날짜:d,예약시간:t,상담내용:document.getElementById('ct2').value,images:[]});
 }
 </script>
 </body></html>

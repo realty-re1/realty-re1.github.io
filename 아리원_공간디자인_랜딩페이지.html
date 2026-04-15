@@ -199,7 +199,7 @@ select:disabled{background-color:#F3F4F6;color:#9CA3AF;cursor:not-allowed}
     <input type="file" id="iFile" accept="image/*" multiple style="display:none" onchange="previewImages(this)">
     <div id="iPrev" class="ipg"></div>
   </div>
-  <div class="fg"><label class="lbl">요청 사항 <span class="req">*</span></label><textarea id="ct3" placeholder="원하시는 디자인 방향, 참고 레퍼런스, 중점을 두고 싶은 부분 등을 자유롭게 적어 주세요."></textarea><div class="em" id="ct3E">요청 사항을 입력해 주세요.</div></div>
+  <div class="fg"><label class="lbl">요청 사항 <span class="opt">(선택)</span></label><textarea id="ct3" placeholder="원하시는 디자인 방향, 참고 레퍼런스, 중점을 두고 싶은 부분 등을 자유롭게 적어 주세요."></textarea><div class="em" id="ct3E">요청 사항을 입력해 주세요.</div></div>
 </div>
 <div class="card">
   <div class="ctit"><span class="sn">4</span> 희망 미팅 일정</div>
@@ -454,7 +454,7 @@ function toggleBudgetEtc(v){
   if(area){area.classList.toggle('hidden', v!=='기타');}
 }
 function subD(){
-  var ok=validate('nm','nmE')&validate('ph','phE')&validate('ad','adE')&validate('ct3','ct3E');
+  var ok=validate('nm','nmE')&validate('ph','phE')&validate('ad','adE');
   if(!ok){var e=document.querySelector('.em.on');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});return;}
   var d=document.getElementById('rDV3').value,t=document.getElementById('rTV3').value;
   if(d&&t)addBooking(d,t);
