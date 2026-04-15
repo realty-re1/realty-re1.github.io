@@ -464,23 +464,20 @@ function subD(){
   document.getElementById('subBtn').disabled=true;document.getElementById('subBtn').textContent='접수 중...';
 
   // 이미지 base64 수집
-  var imgEls=document.querySelectorAll('#iPrev .ipi img');
-  var images=[];
-  var pending=imgEls.length;
-  function doSend(){
-    var ct_v=document.querySelector('input[name="ct"]:checked');
+  var ct_v=document.querySelector('input[name="ct"]:checked');
   var budgetVal=document.getElementById('budget').value==='기타'?(document.getElementById('budgetEtc').value||'기타'):document.getElementById('budget').value;
-  sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:budgetVal,공사유형:ct_v?ct_v.value:'',스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value,images:images});
+  function doSend(imgs){
+    sendData({type:'공간디자인',접수일시:new Date().toLocaleString('ko-KR'),성함:document.getElementById('nm').value,연락처:document.getElementById('ph').value,서비스유형:sv?sv.value:'',공간종류:sp?sp.value:'',공간주소:document.getElementById('ad').value,면적:document.getElementById('area').value,예산범위:budgetVal,공사유형:ct_v?ct_v.value:'',스타일:st?st.value:'',예약날짜:d,예약시간:t,요청사항:document.getElementById('ct3').value,images:imgs});
   }
-  if(pending===0){doSend();return;}
   var iFile=document.getElementById('iFile');
   var files=iFile?Array.prototype.slice.call(iFile.files,0,5):[];
-  if(files.length===0){doSend();return;}
+  if(files.length===0){doSend([]);return;}
+  var imgs=[];
   files.forEach(function(file){
     var r=new FileReader();
     r.onload=function(e){
-      images.push(e.target.result);
-      if(images.length===files.length)doSend();
+      imgs.push(e.target.result);
+      if(imgs.length===files.length)doSend(imgs);
     };
     r.readAsDataURL(file);
   });
